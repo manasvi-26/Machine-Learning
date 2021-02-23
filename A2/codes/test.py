@@ -1,9 +1,14 @@
-x = [1,2]
-y = [2,3]
+import numpy as np
 
-a =  []
-a.append(x)
-a.appedn(y)
+arr1 = np.array([4,3,1,32,21])
+arr2 = arr1 * 10
+sorted_idxs = np.argsort(-arr1)
 
-with open('../output_files/bs.txt', 'w') as write_file:
-        json.dump(list,write_file)
+print(sorted_idxs)
+# >>> array([2, 1, 0, 4, 3])
+
+print(arr1[sorted_idxs])
+# >>> array([ 1,  3,  4, 21, 32])
+
+print(arr2[sorted_idxs])
+# >>> array([ 10,  30,  40, 210, 320])
