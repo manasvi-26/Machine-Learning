@@ -186,7 +186,6 @@ def create_new_gen(generation,mutated_generation,fitness,child_fitness):
     return new_generation,new_fitness
 
 
-
 def write_to_file(vector, text, iter):
 
 
