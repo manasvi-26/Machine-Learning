@@ -29,29 +29,29 @@ def write_to_file(generation, error, fitness,iter,type):
 
     headers = ["GENERATION","TRAINING ERRROR", "VALIDATION ERRROR", "FITNESS", "TYPE"]
     table= tabulate(table_values,headers,tablefmt="fancy_grid")
-    with open('../output_files/26/26-2.txt', 'a+') as write_file:
+    with open('../output_files/27/27-2.txt', 'a+') as write_file:
         write_file.write((str('\n\nITERATION  :  ') + str(iter) + str('\n\n')))
         write_file.write(table)
     
 
-def write_to_file_best(best_error,best_gen,best_fitness,iter):
-
-    iter += 1
+def write_to_file_best(min_error1,min_error2,min_vector,min_fitness,iterations):
     
-    with open('../output_files/26/26-final.txt', 'a+') as write_file:
+    table_values = np.zeros((iterations,5),dtype=object)
 
-        write_file.write((str('\n\nITERATION  :  ') + str(iter) + str('\n\n')))
-        
-        write_file.write((str('\nERROR :  ') +  str('\n')))    
-        json.dump(best_error.tolist(),write_file)
+    for i in range(iterations):
 
-        write_file.write((str('\nGENERATION :  ') + str('\n')))    
-        json.dump(best_gen.tolist(),write_file)
+        table_values[i][0] = i
+        table_values[i][1] = min_vector[i]
+        table_values[i][2] = min_error1[i]
+        table_values[i][3] = min_error2[i]
+        table_values[i][4] = min_fitness[i]
 
-        write_file.write((str('\nFITNESS :  ') + str('\n')))    
-        json.dump(best_fitness.tolist(),write_file)
-
-        write_file.write("\n\n\n")
+    headers = ["ITERATION NUMBER","BEST VECTOR","BEST TRAINING ERRROR", "BEST VALIDATION ERRROR", "BEST FITNESS"]
+    table= tabulate(table_values,headers,tablefmt="fancy_grid")
+    
+    with open('../output_files/27/27-final.txt', 'a+') as write_file:
+        # write_file.write((str('\n\nITERATION  :  ') + str(iter) + str('\n\n')))
+        write_file.write(table)
     
 
 def create_type(c,n):
@@ -88,15 +88,15 @@ def call_server(generation):
 
     error = np.zeros(shape = (POP, 2))
     
-    for i in range(len(generation)): 
+    # for i in range(len(generation)): 
 
-       curr_error = get_errors(SECRET_KEY,generation[i].tolist())
-       error[i] = np.array(curr_error)
+    #    curr_error = get_errors(SECRET_KEY,generation[i].tolist())
+    #    error[i] = np.array(curr_error)
 
-    # for i in range(len(generation)):
+    for i in range(len(generation)):
 
-    #     curr_error = [random.uniform(1, 10), random.uniform(1, 10)]
-    #     error[i] = curr_error
+        curr_error = [random.uniform(1, 10), random.uniform(1, 10)]
+        error[i] = curr_error
 
     return error
 
@@ -244,11 +244,11 @@ def main_loop():
     for i in range(200):
         line = line + str('*')
         
-    with open('../output_files/26/26-2.txt', 'a+') as write_file:
+    with open('../output_files/27/27-2.txt', 'a+') as write_file:
         write_file.write(str(line)+ str('\n\n'))
         write_file.write((str('GENERATIONS: 20 | ITERATIONS: 24 | MUTATION PROBABILITY: 0.7 increased to 0.85') + str('\n\n\n\n\n')))
 
-    with open('../output_files/26/26-final.txt', 'a+') as write_file:
+    with open('../output_files/27/27-final.txt', 'a+') as write_file:
         write_file.write(str(line)+ str('\n\n'))
         write_file.write((str('GENERATIONS: 20 | ITERATIONS: 24 | MUTATION PROBABILITY: 0.7 increased to 0.85') + str('\n\n\n\n\n')))
                 
@@ -293,7 +293,7 @@ def main_loop():
     type = create_type(0,POP)
     write_to_file(generation,error,fitness,-1,type)
     
-    write_to_file_best(best_error,best_gen,best_fitness,-1)
+    # write_to_file_best(best_error,best_gen,best_fitness,-1)
 
     MUTATE_PROB = 0.7
 
@@ -342,10 +342,10 @@ def main_loop():
         min_fitness[iter+1] = best_fitness
         min_vector[iter+1] = best_gen
 
-        write_to_file_best(best_error,best_gen,best_fitness,iter)
 
         if(iter == ITERATIONS - 1):
             
+            write_to_file_best(min_error1,min_error2,min_vector,min_fitness,ITERATIONS)
 
             iters = range(ITERATIONS+1)
 
@@ -355,7 +355,7 @@ def main_loop():
             plt.legend() 
             plt.xlabel("iterations")
             plt.ylabel("errors")
-            plt.savefig('../output_files/26/expand-26.jpeg') 
+            plt.savefig('../output_files/27/expand-26.jpeg') 
 
             return best_gen, best_fitness, best_error
 
