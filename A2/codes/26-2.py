@@ -352,11 +352,9 @@ def main_loop():
             plt.plot(iters,min_error2, label = 'validation')
             plt.plot(iters,min_fitness, label = 'fitness')
             plt.legend() 
-            plt.show()
             plt.xlabel("iterations")
             plt.ylabel("errors")
-            
-            plt.savefig('../output_files/26/expand-26.jpeg')
+            plt.savefig('../output_files/26/expand-26.jpeg') 
 
             return best_gen, best_fitness, best_error
 
