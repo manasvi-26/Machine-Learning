@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from tabulate import tabulate
 
 
-POP = 20
+POP = 10
 FEATURE = 11
 
 
@@ -29,7 +29,7 @@ def write_to_file(generation, error, fitness,iter,type):
 
     headers = ["GENERATION","TRAINING ERRROR", "VALIDATION ERRROR", "FITNESS", "TYPE"]
     table= tabulate(table_values,headers,tablefmt="fancy_grid")
-    with open('../output_files/27/27-2.txt', 'a+') as write_file:
+    with open('../output_files/27-2/27-2.txt', 'a+') as write_file:
         write_file.write((str('\n\nITERATION  :  ') + str(iter) + str('\n\n')))
         write_file.write(table)
     
@@ -49,7 +49,7 @@ def write_to_file_best(min_error1,min_error2,min_vector,min_fitness,iterations):
     headers = ["ITERATION NUMBER","BEST VECTOR","BEST TRAINING ERRROR", "BEST VALIDATION ERRROR", "BEST FITNESS"]
     table= tabulate(table_values,headers,tablefmt="fancy_grid")
     
-    with open('../output_files/27/27-final.txt', 'a+') as write_file:
+    with open('../output_files/27-2/27-2-final.txt', 'a+') as write_file:
         # write_file.write((str('\n\nITERATION  :  ') + str(iter) + str('\n\n')))
         write_file.write(table)
     
@@ -88,28 +88,28 @@ def call_server(generation):
 
     error = np.zeros(shape = (POP, 2))
     
-    # for i in range(len(generation)): 
+    for i in range(len(generation)): 
 
-    #    curr_error = get_errors(SECRET_KEY,generation[i].tolist())
-    #    error[i] = np.array(curr_error)
+       curr_error = get_errors(SECRET_KEY,generation[i].tolist())
+       error[i] = np.array(curr_error)
 
-    for i in range(len(generation)):
+    # for i in range(len(generation)):
 
-        curr_error = [random.uniform(1, 10), random.uniform(1, 10)]
-        error[i] = curr_error
+    #     curr_error = [random.uniform(1, 10), random.uniform(1, 10)]
+    #     error[i] = curr_error
 
     return error
 
 
 # FITNESS FUNCTION
-def fitness_function(error):
+def fitness_function(error,TRAIN_FACTOR):
 
     fitness = np.zeros(shape = (POP))
 
     # fitness is sum of training and validation errors
     for i in range(len(error)):
         curr_error = error[i]
-        fitness[i] = ((curr_error[0] + curr_error[1]))
+        fitness[i] = (abs(TRAIN_FACTOR*curr_error[0] + curr_error[1]))
     
     return fitness
 
@@ -244,13 +244,13 @@ def main_loop():
     for i in range(200):
         line = line + str('*')
         
-    with open('../output_files/27/27-2.txt', 'a+') as write_file:
+    with open('../output_files/27-2/27-2.txt', 'a+') as write_file:
         write_file.write(str(line)+ str('\n\n'))
-        write_file.write((str('GENERATIONS: 20 | ITERATIONS: 24 | MUTATION PROBABILITY: 0.7 increased to 0.85') + str('\n\n\n\n\n')))
+        write_file.write((str('POPULATION:10 | ITERATIONS: 47 | MUTATION PROBABILITY: 0.7 increased to 0.85  | changed fitness function') + str('\n\n\n\n\n')))
 
-    with open('../output_files/27/27-final.txt', 'a+') as write_file:
+    with open('../output_files/27-2/27-2-final.txt', 'a+') as write_file:
         write_file.write(str(line)+ str('\n\n'))
-        write_file.write((str('GENERATIONS: 20 | ITERATIONS: 24 | MUTATION PROBABILITY: 0.7 increased to 0.85') + str('\n\n\n\n\n')))
+        write_file.write((str('POPULATION:10 | ITERATIONS: 47 | MUTATION PROBABILITY: 0.7 increased to 0.85  | changed fitness function') + str('\n\n\n\n\n')))
                 
 
     #generate initial generation
@@ -258,7 +258,7 @@ def main_loop():
 
     MUTATE_PROB = 0.9
     MUTATE_RANGE = np.array([0.9,1.1])
-    ITERATIONS = 24
+    ITERATIONS = 47
 
     generation = generate_initial(vector,MUTATE_PROB,MUTATE_RANGE)
 
@@ -266,7 +266,8 @@ def main_loop():
     error = call_server(generation)
 
     #get the fitness value of every vector in the generation
-    fitness = fitness_function(error)
+    TRAIN_FACTOR = 0.7
+    fitness = fitness_function(error,TRAIN_FACTOR)
 
     #sort the errors,fitness and generation corresponding to it
     generation, error, fitness, sorted_idx = sort_generation(generation,error,fitness)
@@ -316,8 +317,14 @@ def main_loop():
         # call get_errors for mutated generation
         child_error = call_server(mutated_generation)
 
+        # changing TRAIN_FACTOR
+        if(iter > 5 and TRAIN_FACTOR == 0.7 and best_error[0] > 1e11):
+            TRAIN_FACTOR = 1
+        if(iter > 5 and TRAIN_FACTOR == 1 and best_error[0] < 1e11 and best_error[1] < 1e11):
+            TRAIN_FACTOR = -1
+        
         # calculate fitness for mutated generation
-        child_fitness = fitness_function(child_error)
+        child_fitness = fitness_function(child_error,TRAIN_FACTOR)
 
         #sort the errors,fitness and generation corresponding to it
         new_generation, child_error, child_fitness,sorted_idx = sort_generation(mutated_generation,child_error,child_fitness)
@@ -355,7 +362,7 @@ def main_loop():
             plt.legend() 
             plt.xlabel("iterations")
             plt.ylabel("errors")
-            plt.savefig('../output_files/27/expand-26.jpeg') 
+            plt.savefig('../output_files/27-2/27-2.jpeg') 
 
             return best_gen, best_fitness, best_error
 
