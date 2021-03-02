@@ -239,7 +239,6 @@ def create_new_gen(generation,mutated_generation,error,child_error,fitness,child
 
     pot_new_generation_error = np.concatenate((error[:(int(POP/2))],child_error), axis = 0)
 
-
     topgen,toperror,topfitness,sorted_idx = sort_generation(pot_new_generation, pot_new_generation_error, pot_new_generation_fitness)
 
 
@@ -275,8 +274,6 @@ def main_loop():
 
     generation, error, fitness = get_prev()
 
-
-
     #get the fitness value of every vector in the generation
     fitness = fitness_function(error)
 
@@ -307,8 +304,6 @@ def main_loop():
     line =''
     for i in range(200):
         line = line + str('*')
-
-    
 
     with open('../output_files/1-3/1-3.txt', 'a+') as write_file:
         write_file.write(str('\n\n') +str(line)+ str('\n\n'))
