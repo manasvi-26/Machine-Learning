@@ -6,16 +6,18 @@ import matplotlib.pyplot as plt
 from tabulate import tabulate
 import os
 
-POP = 8
+POP = 12
 FEATURE = 11
 
-overfit_vector = np.array([0.00000000e+00, -1.53575443e-12, -2.38064603e-13,  4.67653589e-11,
--1.84927508e-10 ,-1.97048684e-15  ,8.63845706e-16 , 2.27066239e-05,-2.07342035e-06 ,-1.67377079e-08  ,1.00508477e-09])
+# overfit_vector = np.array([0.00000000e+00, -1.53575443e-12, -2.38064603e-13,  4.67653589e-11,
+# -1.84927508e-10 ,-1.97048684e-15  ,8.63845706e-16 , 2.27066239e-05,-2.07342035e-06 ,-1.67377079e-08  ,1.00508477e-09])
 
+# generating new
+overfit_vector = [ 0.00000000e+00, -1.64379458e-12, -2.36774131e-13,  4.78004881e-11, -1.82070627e-10, -1.84252091e-15,  7.10170109e-16,  2.21299915e-05, -1.80994584e-06, -1.62770324e-08, 8.99071483e-10]
 
 def get_prev():
 
-    f = open('../output_files/1-3/endVec.json')
+    f = open('../output_files/3-3/endVec.json')
     data = json.load(f)
     generation = np.array(data["Generation"])
     error = np.array(data["Error"])
@@ -26,9 +28,8 @@ def get_prev():
 def write_to_json(generation,error,fitness):
    
     data = {"Generation" : generation.tolist(), "Error" : error.tolist() , "Fitness" : fitness.tolist()}
-    with open('../output_files/1-3/endVec.json','w') as f:
+    with open('../output_files/3-3/endVec.json','w') as f:
         json.dump(data,f, indent=5)
-
 
 
 def write_to_file(generation, error, fitness,iter,type):
@@ -46,19 +47,17 @@ def write_to_file(generation, error, fitness,iter,type):
 
     headers = ["GENERATION","TRAINING ERRROR", "VALIDATION ERRROR", "FITNESS", "TYPE"]
     table= tabulate(table_values,headers,tablefmt="fancy_grid")
-    with open('../output_files/1-3/1-3.txt', 'a+') as write_file:
+    with open('../output_files/3-3/3-3.txt', 'a+') as write_file:
         write_file.write((str('\n\nITERATION  :  ') + str(iter) + str('\n\n')))
         write_file.write(table)
 
 def create_type(c,n):
-
 
     arr = np.zeros(shape = (n))
     for i in range(n):
         arr[i] = c
     
     return arr
-
 
 #CALL SERVER
 def call_server(generation):
@@ -93,13 +92,9 @@ def write_to_file_best(min_error1,min_error2,min_vector,min_fitness,iterations):
     headers = ["ITERATION NUMBER","BEST VECTOR","BEST TRAINING ERRROR", "BEST VALIDATION ERRROR", "BEST FITNESS"]
     table= tabulate(table_values,headers,tablefmt="fancy_grid")
     
-    with open('../output_files/1-3/1-3-final.txt', 'a+') as write_file:
+    with open('../output_files/3-3/3-3-final.txt', 'a+') as write_file:
         # write_file.write((str('\n\nITERATION  :  ') + str(iter) + str('\n\n')))
         write_file.write(table)
-
-    
-
-
 
 
 def generate_initial(vector,MUTATE_PROB,MUTATE_RANGE):
@@ -117,7 +112,7 @@ def generate_initial(vector,MUTATE_PROB,MUTATE_RANGE):
                 val = val * delta
             
             generation[i][feature] = val
-    
+   
     return generation
 
 
@@ -132,7 +127,7 @@ def fitness_function(error):
         curr_error = error[i]
         training = curr_error[0]
         validation = curr_error[1]
-        fitness[i] = (( 0.6*training + validation))
+        fitness[i] = (( 0.7*training + validation ))
     
     return fitness
 
@@ -146,7 +141,6 @@ def sort_generation(generation, error, fitness):
     error = error[sorted_idx]
     fitness = fitness[sorted_idx]
 
-
     return generation, error, fitness,sorted_idx
 
 #SELECTION
@@ -155,7 +149,7 @@ def selection(generation):
     selection_var = 4
     pool = np.zeros(shape = (selection_var,FEATURE))
     pool = generation[:selection_var]
-    
+
     return pool
 
 
@@ -169,7 +163,7 @@ def pick_two(pool):
 #CROSSOVER
 def crossover(pool):
 
-    n_c = 5
+    n_c = 3
 
     crossOver_generation = np.zeros(shape= (POP,FEATURE))
 
@@ -180,7 +174,6 @@ def crossover(pool):
 
         u = random.uniform(0,1)
         
-
         if (u < 0.5):
             beta = (2 * u)**((n_c + 1)**-1)
         else:
@@ -193,6 +186,7 @@ def crossover(pool):
         crossOver_generation[i+1] = child2
 
         i += 2
+    
     return crossOver_generation
 
 
@@ -226,8 +220,6 @@ def create_new_gen(generation,mutated_generation,error,child_error,fitness,child
     new_fitness = np.zeros(shape = POP )
     new_error = np.zeros(shape = (POP,2))
 
-    # new_errors = np.zeros(shape = (POP,2) )
-
     # parent top5 pool and mutated generations vector
     pot_new_generation  = np.concatenate( (generation[:(int(POP/2))],mutated_generation), axis=0)
 
@@ -256,7 +248,7 @@ def main_loop():
     vector = overfit_vector
 
     MUTATE_PROB = 0.9
-    MUTATE_RANGE = np.array([0.95,1.05])
+    MUTATE_RANGE = np.array([0.9,1.1])
     ITERATIONS = 6
 
     # generation = generate_initial(vector,MUTATE_PROB,MUTATE_RANGE)
@@ -276,12 +268,11 @@ def main_loop():
     #sort the errors,fitness and generation corresponding to it
     generation, error, fitness, sorted_idx = sort_generation(generation,error,fitness)
 
-
     min_error1 = np.zeros(shape =ITERATIONS+1)
     min_error2 = np.zeros(shape =ITERATIONS+1)
     min_fitness = np.zeros(shape =ITERATIONS+1)
 
-    min_vector = np.zeros(shape = (ITERATIONS+1,11))
+    min_vector = np.zeros(shape = (ITERATIONS+1,FEATURE))
 
     best_error = error[0]
     best_gen = generation[0]
@@ -293,35 +284,30 @@ def main_loop():
     min_fitness[0] = best_fitness
     min_vector[0] = best_gen
 
-
     type = create_type(0,POP)
 
     line =''
     for i in range(200):
         line = line + str('*')
 
-    with open('../output_files/1-3/1-3.txt', 'a+') as write_file:
+    with open('../output_files/3-3/3-3.txt', 'a+') as write_file:
         write_file.write(str('\n\n') +str(line)+ str('\n\n'))
-        write_file.write((str('GENERATIONS: 8 | ITERATIONS: 6 | RUN NUMBER: 3') + str('\n\n\n\n\n')))
+        write_file.write((str('GENERATIONS: 12 | ITERATIONS: 6 | RUN NUMBER: 8') + str('\n\n\n\n\n')))
 
-    with open('../output_files/1-3/1-3-final.txt', 'a+') as write_file:
+    with open('../output_files/3-3/3-3-final.txt', 'a+') as write_file:
         write_file.write(str('\n\n')+ str(line)+ str('\n\n'))
-        write_file.write((str('GENERATIONS: 8 | ITERATIONS: 6 | RUN NUMBER: 3') + str('\n\n\n\n\n')))
+        write_file.write((str('GENERATIONS: 12 | ITERATIONS: 6 | RUN NUMBER: 8') + str('\n\n\n\n\n')))
 
 
     write_to_file(generation,error,fitness,-1,type)
-
 
     # write_to_file_best(best_error,best_gen,best_fitness,-1)
 
     write_to_json(generation,error,fitness)
 
-
-    MUTATE_PROB = 0.3
+    MUTATE_PROB = 0.5
 
     for iter in range(ITERATIONS):
-
-       
 
         #selection
         pool = selection(generation)
@@ -341,7 +327,7 @@ def main_loop():
         child_fitness = fitness_function(child_error)
 
         #sort the errors,fitness and generation corresponding to it
-        new_generation, child_error, child_fitness,sorted_idx = sort_generation(mutated_generation,child_error,child_fitness)
+        mutated_generation, child_error, child_fitness,sorted_idx = sort_generation(mutated_generation,child_error,child_fitness)
 
 
         # take top 10 from ( mutated generation + top 5 of parents )
@@ -377,7 +363,7 @@ def main_loop():
             plt.legend() 
             plt.xlabel("iterations")
             plt.ylabel("errors")
-            plt.savefig('../output_files/1-3/expand1.jpeg') 
+            plt.savefig('../output_files/3-3/expand1.jpeg') 
 
             return best_gen, best_fitness, best_error
 
