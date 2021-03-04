@@ -25,9 +25,7 @@ def get_prev():
 
 def write_to_json(generation,error,fitness):
    
-    data = {"Generation" : generation.tolist(), "Error" : error.tolist() , "Fitness" : fitness.tolist()}
-    with open('../output_files/1-3/endVec.json','w') as f:
-        json.dump(data,f, indent=5)
+    
 
 
 
