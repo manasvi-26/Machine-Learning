@@ -42,7 +42,8 @@ def submit(id, vector):
 # Replace 'SECRET_KEY' with your team's secret key (Will be sent over email)
 if __name__ == "__main__":
 
-    vector = [0.00000000e+00, -1.56352906e-12, -2.43296122e-13,  5.48463600e-11, -1.86141718e-10, -1.56992826e-15, 7.50433348e-16,  2.43236730e-05, -1.71262747e-06, -1.54374148e-08, 8.08945548e-10] 
-    # print(get_errors(SECRET_KEY, vector))
-    #print(submit(SECRET_KEY, vector))
+    vector = [ 0.00000000e+00 , -1.67189477e-12 , -2.16896788e-13 , 6.27428185e-11 , -1.76070826e-10 , -1.51855572e-15 , 7.62258200e-16 , 3.02980004e-05  , -1.74769388e-06 , -1.28925084e-08 ,  7.13136708e-10]
+
+    print(get_errors(SECRET_KEY, vector))
+    print(submit(SECRET_KEY, vector))
 
