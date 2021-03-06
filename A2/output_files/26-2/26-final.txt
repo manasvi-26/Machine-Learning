@@ -5,8 +5,6 @@ GENERATIONS: 20 | ITERATIONS: 24 | MUTATION PROBABILITY: 0.7 increased to 0.85
 
 
 
-
-
 ITERATION  :  0
 
 

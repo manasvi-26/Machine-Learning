@@ -1,3 +1,4 @@
+
 import json
 import requests
 import numpy as np
@@ -13,7 +14,6 @@ def urljoin(root, path=''):
 def send_request(id, vector, path):
     api = urljoin(API_ENDPOINT, path)
     vector = json.dumps(vector)
-    
     response = requests.post(api, data={'id':id, 'vector':vector}).text
     if "reported" in response:
         print(response)
@@ -26,14 +26,23 @@ def get_errors(id, vector):
     assert len(vector) == MAX_DEG
 
     return json.loads(send_request(id, vector, 'geterrors'))
-    
 
-# def get_overfit_vector(id):
-#     return json.loads(send_request(id,[0], 'getoverfit'))
+def get_overfit_vector(id):
+    return json.loads(send_request(id, [0], 'getoverfit'))
+
+def submit(id, vector):
+    """
+    used to make official submission of your weight vector
+    returns string "successfully submitted" if properly submitted.
+    """
+    for i in vector: assert 0<=abs(i)<=10
+    assert len(vector) == MAX_DEG
+    return send_request(id, vector, 'submit')
 
 # Replace 'SECRET_KEY' with your team's secret key (Will be sent over email)
 if __name__ == "__main__":
-    vector = [0.0, -1.6066728557765327e-12, -2.4562371616049357e-13, 4.6487301261255185e-11, -1.740033074341892e-10, -1.6144896397602713e-15, 8.891655886550115e-16, 2.357425803839365e-05, -2.062455168665507e-06, -1.55163546381005e-08, 9.467599204279566e-10]
 
-    print(get_errors(SECRET_KEY, vector))
-    
+    vector = [0.00000000e+00, -1.56352906e-12, -2.43296122e-13,  5.48463600e-11, -1.86141718e-10, -1.56992826e-15, 7.50433348e-16,  2.43236730e-05, -1.71262747e-06, -1.54374148e-08, 8.08945548e-10] 
+    # print(get_errors(SECRET_KEY, vector))
+    #print(submit(SECRET_KEY, vector))
+
