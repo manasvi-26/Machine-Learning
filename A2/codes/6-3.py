@@ -11,19 +11,20 @@ MUTATE_RANGE = [0.9,1.1]
 POOL_SIZE = 5
 PARENT = 4
 CHILD = POP - PARENT
-ITERATIONS = 5
+ITERATIONS = 7
 
 NC = 2
-TRAINING_FACTOR = 0.7
+TRAINING_FACTOR = 0.6
 VALIDATION_FACTOR = 1
 
-HEADER1 = ["POPULATION","TRAINING ERRROR", "VALIDATION ERRROR", "FITNESS"]
-HEADER2 = ["PARENT1", "PARENT2","CROSSOVER VECTOR","MUTATED CHILD"]
+HEADER1 = ["INDEX","POPULATION","TRAINING ERRROR", "VALIDATION ERRROR", "FITNESS"]
+HEADER2 = ["PARENT INDEXES","PARENT1", "PARENT2","CROSSOVER VECTOR","MUTATED CHILD"]
+HEADER3 = ["INDEX", "PARENT"]
 
-ALL_FILE = '../output_files/6-3/trace.txt'
+TRACE_FILE = '../output_files/6-3/trace.txt'
 BEST_FILE = '../output_files/6-3/best_vector.txt'
 
-RUN = 2
+RUN = 4
 
 overfit_vector = np.array([0.0, -1.45799022e-12, -2.28980078e-13,  4.62010753e-11, -1.75214813e-10, -1.83669770e-15,
            8.52944060e-16,  2.29423303e-05, -2.04721003e-06, -1.59792834e-08,  9.98214034e-10])
@@ -59,11 +60,13 @@ def makeTable(fitness,text,filename,type):
 
     for i in range(len(fitness)):
 
-        table[i][0] = 'P'
-        table[i][0] = fitness[i][:FEATURE]
-        table[i][1] = fitness[i][FEATURE]
-        table[i][2] = fitness[i][FEATURE+1]
-        table[i][3] = fitness[i][FEATURE+2]
+        if type == 0: table[i][0] = str('P' + str(i))
+        if type == 1: table[i][0] = str('C' + str(i))
+        if type == -1: table[i][0] = i
+        table[i][1] = fitness[i][:FEATURE]
+        table[i][2] = fitness[i][FEATURE]
+        table[i][3] = fitness[i][FEATURE+1]
+        table[i][4] = fitness[i][FEATURE+2]
        
 
     table= tabulate(table,HEADER1,tablefmt="fancy_grid")
@@ -82,18 +85,17 @@ def generate_initial(vector):
                 
                 delta = random.uniform(MUTATE_RANGE[0],MUTATE_RANGE[1])
                 val = val * delta
-            
+
             generation[i][feature] = val
     
     return generation
 
-def get_errors(generation):
+def call_server(generation):
 
     fitness = np.zeros(shape = (POP,3))
     for i in range(POP):
-        error = [random.uniform(0,1),random.uniform(0,1)]
-
-        #error = get_errors(SECRET_KEY,generation[i].tolist())
+        # error = [random.uniform(0,1),random.uniform(0,1)]
+        error = get_errors(SECRET_KEY,generation[i].tolist())
         fitness[i][0] = error[0]
         fitness[i][1] = error[1]
 
@@ -101,7 +103,7 @@ def get_errors(generation):
     return fitness
 
 
-def fitness_funtion(fitness, generation):
+def fitness_function(fitness, generation,type):
 
     for i in range(POP):
         fitness[i][FEATURE+2] = (TRAINING_FACTOR*fitness[i][FEATURE] + VALIDATION_FACTOR * fitness[i][FEATURE+1])
@@ -110,15 +112,16 @@ def fitness_funtion(fitness, generation):
     fitness = fitness[sorted_idx]
     generation = generation[sorted_idx]
     
-    makeTable(fitness,"GENERATION FITNESS AND ERRORS",ALL_FILE,0)
+    if type == 0: makeTable(fitness,"GENERATION FITNESS AND ERRORS",TRACE_FILE,type)
+    if type == 1: makeTable(fitness,"CHILD GENERATION FITNESS AND ERRORS",TRACE_FILE,type)
 
     return fitness,generation
 
 
-def get_fitness(generation):
+def get_fitness(generation,type):
 
-    fitness = get_errors(generation)
-    fitness, generation = fitness_funtion(fitness, generation)
+    fitness = call_server(generation)
+    fitness, generation = fitness_function(fitness, generation,type)
 
     return fitness, generation
 
@@ -128,6 +131,16 @@ def selection(generation):
     pool = np.zeros(shape = (POOL_SIZE,FEATURE))
     pool = generation[:POOL_SIZE]
 
+    table = np.zeros((POOL_SIZE,2),dtype=object)
+
+    for i in range(POOL_SIZE):
+        table[i][0] = str('P' + str(i))
+        table[i][1] = pool[i]
+    
+    table= tabulate(table,HEADER3,tablefmt="fancy_grid")
+    write_file(table,HEADER3,"SELECTED MATING POOL",TRACE_FILE)
+    # print(table)
+
     return pool
 
 def crossover(pool):
@@ -136,17 +149,26 @@ def crossover(pool):
     crossOver_generation = np.zeros(shape= (POP,FEATURE))
 
     i = 0
-    table = np.zeros((POP,4),dtype=object)
+    table = np.zeros((POP,5),dtype=object)
     while i < POP:
 
-        parent1 = random.choice(pool)
-        parent2 = random.choice(pool)
+        p1 = random.choice(list(enumerate(pool)))
+        p2 = random.choice(list(enumerate(pool)))
 
-        table[i][0] = parent1
-        table[i][1] = parent2
+        p1idx = "P" + str(p1[0])
+        parent1 = p1[1]
+        p2idx = "P" + str(p2[0])
+        parent2 = p2[1]
 
-        table[i+1][0] = parent1
-        table[i+1][1] = parent2
+        #parent indexes
+        table[i][0] = p1idx + ", " + p2idx
+        table[i+1][0] = p1idx + ", " + p2idx
+
+        table[i][1] = parent1
+        table[i][2] = parent2
+
+        table[i+1][1] = parent1
+        table[i+1][2] = parent2
 
 
         u = random.uniform(0,1)
@@ -159,8 +181,8 @@ def crossover(pool):
         child1 = 0.5*((1 + b) * parent1 + (1 - b) * parent2)
         child2 = 0.5*((1 - b) * parent1 + (1 + b) * parent2)
         
-        table[i][2] = child1
-        table[i+1][2] = child2
+        table[i][3] = child1
+        table[i+1][3] = child2
 
         crossOver_generation[i]= child1
         crossOver_generation[i+1] = child2
@@ -182,11 +204,11 @@ def mutation(crossOver_generation,table):
 
                 child[feature_index] = new_feature
 
-        table[i][3] = child
+        table[i][4] = child
         i+=1
     
     table= tabulate(table,HEADER2,tablefmt="fancy_grid")
-    write_file(table,HEADER2,"CREATING CHILDREN",ALL_FILE)
+    write_file(table,HEADER2,"CREATING CHILDREN",TRACE_FILE)
     return crossOver_generation
 
 
@@ -199,7 +221,6 @@ def generate_children(pool):
 
 def create_newGeneration(parents_fitness,children_fitness,iter):
 
-
     parents_fitness = parents_fitness[:PARENT]
     children_fitness = children_fitness[:CHILD]
     new_fitness = np.concatenate((parents_fitness,children_fitness))
@@ -208,7 +229,7 @@ def create_newGeneration(parents_fitness,children_fitness,iter):
     new_fitness = new_fitness[sorted_idx]
     new_generation = new_fitness[:,:FEATURE]
 
-    makeTable(new_fitness,str("\n\nITERATION :  " + str(iter+1) + "\n\n\nNEXT GENERATION"),ALL_FILE,0)
+    makeTable(new_fitness,str("\n\nITERATION :  " + str(iter+1) + "\n\n\nNEXT GENERATION"),TRACE_FILE,0)
 
     return new_fitness,new_generation
 
@@ -219,7 +240,7 @@ def main():
     for i in range(200):
         line = line + str('*')
 
-    with open(ALL_FILE, 'a+') as write_file:
+    with open(TRACE_FILE, 'a+') as write_file:
         write_file.write(str('\n\n') +str(line)+ str('\n\n' + str("RUN NUMBER : ") + str(RUN)))
 
 
@@ -230,12 +251,12 @@ def main():
     
 
     #This returns the sorted fitness and generation.
-    fitness, generation = get_fitness(generation)
+    fitness, generation = get_fitness(generation,0)
 
-    '''
+    # '''
     
     fitness, generation = getLast()
-    fitness, generation = fitness_funtion(fitness,generation)
+    fitness, generation = fitness_function(fitness,generation,0)
 
     best_fitness = np.zeros(shape = (ITERATIONS+1,FEATURE+3))
     best_fitness[0] = fitness[0]
@@ -247,7 +268,7 @@ def main():
         children = generate_children(pool)
 
         #Calculate fitness function of children
-        children_fitness,children = get_fitness(children)
+        children_fitness,children = get_fitness(children,1)
 
         #New generation gets created from parent and children values
         new_fitness,new_generation = create_newGeneration(fitness,children_fitness,iter)
@@ -258,9 +279,8 @@ def main():
         dumpLast(fitness,generation)
         best_fitness[iter+1] = fitness[0]
     
-    makeTable(best_fitness,str("BEST VECTORS OF RUN :  " + str(RUN)),BEST_FILE)
+    makeTable(best_fitness,str("BEST VECTORS OF RUN :  " + str(RUN)),BEST_FILE,-1)
         
-
 
 if __name__ == '__main__':
     main()
