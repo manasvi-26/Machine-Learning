@@ -6,15 +6,15 @@ from tabulate import tabulate
 
 POP = 20
 FEATURE = 11
-MUTATE_PROB = 0.4
+MUTATE_PROB = 0.3
 MUTATE_RANGE = [0.9,1.1]
 POOL_SIZE = 5
 PARENT = 4
 CHILD = POP - PARENT
-ITERATIONS = 7
+ITERATIONS = 8
 
-NC = 2
-TRAINING_FACTOR = 0.6
+NC = 3
+TRAINING_FACTOR = 0.8
 VALIDATION_FACTOR = 1
 
 HEADER1 = ["INDEX","POPULATION","TRAINING ERRROR", "VALIDATION ERRROR", "FITNESS"]
@@ -24,7 +24,7 @@ HEADER3 = ["INDEX", "PARENT"]
 TRACE_FILE = '../output_files/6-3/trace.txt'
 BEST_FILE = '../output_files/6-3/best_vector.txt'
 
-RUN = 4
+RUN = 9
 
 overfit_vector = np.array([0.0, -1.45799022e-12, -2.28980078e-13,  4.62010753e-11, -1.75214813e-10, -1.83669770e-15,
            8.52944060e-16,  2.29423303e-05, -2.04721003e-06, -1.59792834e-08,  9.98214034e-10])
@@ -106,7 +106,7 @@ def call_server(generation):
 def fitness_function(fitness, generation,type):
 
     for i in range(POP):
-        fitness[i][FEATURE+2] = (TRAINING_FACTOR*fitness[i][FEATURE] + VALIDATION_FACTOR * fitness[i][FEATURE+1])
+        fitness[i][FEATURE+2] = (TRAINING_FACTOR *fitness[i][FEATURE] + VALIDATION_FACTOR *fitness[i][FEATURE+1])
         
     sorted_idx = np.argsort(fitness[:,-1])
     fitness = fitness[sorted_idx]
