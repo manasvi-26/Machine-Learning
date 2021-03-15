@@ -13,7 +13,7 @@ PARENT = 4
 CHILD = POP - PARENT
 ITERATIONS = 8
 
-NC = 3
+NC = 2
 
 TRAINING_FACTOR = 0.8
 VALIDATION_FACTOR = 1
@@ -22,10 +22,10 @@ HEADER1 = ["INDEX","POPULATION","TRAINING ERRROR", "VALIDATION ERRROR", "FITNESS
 HEADER2 = ["PARENT INDEXES","PARENT1", "PARENT2","CROSSOVER VECTOR","MUTATED CHILD"]
 HEADER3 = ["INDEX", "PARENT"]
 
-TRACE_FILE = '../output_files/6-3/trace.txt'
-BEST_FILE = '../output_files/6-3/best_vector.txt'
+TRACE_FILE = '../output_files/13-3/trace.txt'
+BEST_FILE = '../output_files/13-3/best_vector.txt'
 
-RUN = 16
+RUN = 5
 
 overfit_vector = np.array([0.0, -1.45799022e-12, -2.28980078e-13,  4.62010753e-11, -1.75214813e-10, -1.83669770e-15,
            8.52944060e-16,  2.29423303e-05, -2.04721003e-06, -1.59792834e-08,  9.98214034e-10])
@@ -40,11 +40,11 @@ def write_file(table,headers,text,filename):
 def dumpLast(fitness,generation):
   
     data = {"Generation" : generation.tolist(), "Fitness" : fitness.tolist()}
-    with open('../output_files/6-3/lastVec.json','w') as f:
+    with open('../output_files/13-3/lastVec.json','w') as f:
         json.dump(data,f, indent=5)
 
 def getLast():
-    f = open('../output_files/6-3/lastVec.json')
+    f = open('../output_files/13-3/lastVec.json')
     data = json.load(f)
     generation = np.array(data["Generation"])
     fitness = np.array(data["Fitness"])
@@ -107,7 +107,7 @@ def call_server(generation):
 def fitness_function(fitness, generation,type):
 
     for i in range(POP):
-        fitness[i][FEATURE+2] = (fitness[i][FEATURE] + fitness[i][FEATURE+1])
+        fitness[i][FEATURE+2] = (TRAINING_FACTOR*fitness[i][FEATURE] + VALIDATION_FACTOR*fitness[i][FEATURE+1])
         
     sorted_idx = np.argsort(fitness[:,-1])
     fitness = fitness[sorted_idx]
@@ -145,7 +145,6 @@ def selection(generation):
     return pool
 
 def crossover(pool):
-
    
     crossOver_generation = np.zeros(shape= (POP,FEATURE))
 
@@ -254,7 +253,7 @@ def main():
     #This returns the sorted fitness and generation.
     fitness, generation = get_fitness(generation,0)
 
-    # '''
+    '''
     
     fitness, generation = getLast()
     fitness, generation = fitness_function(fitness,generation,0)
