@@ -7,13 +7,13 @@ from tabulate import tabulate
 POP = 20
 FEATURE = 11
 MUTATE_PROB = 0.3
-MUTATE_RANGE = [0.9,1.1]
+MUTATE_RANGE = [0.97,1.02]
 POOL_SIZE = 5
-PARENT = 4
+PARENT = 5
 CHILD = POP - PARENT
-ITERATIONS = 1
+ITERATIONS = 8
 
-NC = 4
+NC = 5
 
 TRAINING_FACTOR = -1
 VALIDATION_FACTOR = 1
@@ -25,7 +25,7 @@ HEADER3 = ["INDEX", "PARENT"]
 TRACE_FILE = '../output_files/14-3/trace.txt'
 BEST_FILE = '../output_files/14-3/best_vector.txt'
 
-RUN = 7
+RUN = 25
 
 overfit_vector = np.array([0.0, -1.45799022e-12, -2.28980078e-13,  4.62010753e-11, -1.75214813e-10, -1.83669770e-15,
            8.52944060e-16,  2.29423303e-05, -2.04721003e-06, -1.59792834e-08,  9.98214034e-10])
@@ -40,6 +40,11 @@ def write_file(table,headers,text,filename):
 def dumpLast(fitness,generation):
   
     data = {"Generation" : generation.tolist(), "Fitness" : fitness.tolist()}
+    with open('../output_files/14-3/lastVec.json','w') as f:
+        json.dump(data,f, indent=5)
+
+def getLast():
+    f = open('../output_files/13-3/lastVec.json')
     with open('../output_files/14-3/lastVec.json','w') as f:
         json.dump(data,f, indent=5)
 
@@ -107,7 +112,7 @@ def call_server(generation):
 def fitness_function(fitness, generation,type):
 
     for i in range(POP):
-        fitness[i][FEATURE+2] = (fitness[i][FEATURE] + fitness[i][FEATURE+1])
+        fitness[i][FEATURE+2] = abs(fitness[i][FEATURE] -fitness[i][FEATURE+1])
         
     sorted_idx = np.argsort(fitness[:,-1])
     fitness = fitness[sorted_idx]
@@ -145,7 +150,6 @@ def selection(generation):
     return pool
 
 def crossover(pool):
-
    
     crossOver_generation = np.zeros(shape= (POP,FEATURE))
 
